@@ -110,6 +110,7 @@ export interface ChapterReaderSettings {
     voice?: Voice;
     rate?: number;
     pitch?: number;
+    autoReadCount?: number;
   };
   epubLocation: string;
   epubUseAppTheme: boolean;
@@ -197,6 +198,7 @@ export const initialChapterReaderSettings: ChapterReaderSettings = {
   tts: {
     rate: 1,
     pitch: 1,
+    autoReadCount: 0,
   },
   epubLocation: '',
   epubUseAppTheme: false,

@@ -27,6 +27,7 @@ import {
   getTTSAction,
   clearTTSAction,
 } from '@utils/ttsNotification';
+import { showToast } from '@utils/showToast';
 
 type WebViewPostEvent = {
   type: string;
@@ -90,6 +91,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
   const nextChapterScreenVisible = useRef<boolean>(false);
   const autoStartTTSRef = useRef<boolean>(false);
   const isTTSReadingRef = useRef<boolean>(false);
+  const sessionAutoReadCount = useRef<number>(0);
 
   useEffect(() => {
     const checkNotificationActions = setInterval(() => {
@@ -220,7 +222,17 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
           case 'next':
             nextChapterScreenVisible.current = true;
             if (event.autoStartTTS) {
-              autoStartTTSRef.current = true;
+              const limit = readerSettings.tts?.autoReadCount || 0;
+              if (limit > 0) {
+                sessionAutoReadCount.current += 1;
+                if (sessionAutoReadCount.current >= limit) {
+                  showToast(getString('common.autoReadLimitReached'));
+                  event.autoStartTTS = false;
+                }
+              }
+              if (event.autoStartTTS) {
+                autoStartTTSRef.current = true;
+              }
             }
             navigateChapter('NEXT');
             break;
@@ -235,6 +247,7 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
           case 'speak':
             if (event.data && typeof event.data === 'string') {
               if (!isTTSReadingRef.current) {
+                sessionAutoReadCount.current = 0;
                 isTTSReadingRef.current = true;
                 showTTSNotification({
                   novelName: novel?.name || 'Unknown',
@@ -311,8 +324,8 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
                 --theme-onSecondary: ${theme.onSecondary};
                 --theme-surface: ${theme.surface};
                 --theme-surface-0-9: ${color(theme.surface)
-                  .alpha(0.9)
-                  .toString()};
+            .alpha(0.9)
+            .toString()};
                 --theme-onSurface: ${theme.onSurface};
                 --theme-surfaceVariant: ${theme.surfaceVariant};
                 --theme-onSurfaceVariant: ${theme.onSurfaceVariant};
@@ -322,23 +335,20 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
                 
                 @font-face {
                   font-family: ${readerSettings.fontFamily};
-                  src: url("file:///android_asset/fonts/${
-                    readerSettings.fontFamily
-                  }.ttf");
+                  src: url("file:///android_asset/fonts/${readerSettings.fontFamily
+          }.ttf");
                 }
                 </style>
 
               <link rel="stylesheet" href="${pluginCustomCSS}">
               <style>${readerSettings.customCSS}</style>
             </head>
-            <body class="${
-              chapterGeneralSettings.pageReader ? 'page-reader' : ''
-            }">
-              <div class="transition-chapter" style="transform: ${
-                nextChapterScreenVisible.current
-                  ? 'translateX(-100%)'
-                  : 'translateX(0%)'
-              };
+            <body class="${chapterGeneralSettings.pageReader ? 'page-reader' : ''
+          }">
+              <div class="transition-chapter" style="transform: ${nextChapterScreenVisible.current
+            ? 'translateX(-100%)'
+            : 'translateX(0%)'
+          };
               ${chapterGeneralSettings.pageReader ? '' : 'display: none'}"
               ">${chapter.name}</div>
               <div id="LNReader-chapter">
@@ -348,30 +358,30 @@ const WebViewReader: React.FC<WebViewReaderProps> = ({ onPress }) => {
               </body>
               <script>
                 var initialPageReaderConfig = ${JSON.stringify({
-                  nextChapterScreenVisible: nextChapterScreenVisible.current,
-                })};
+            nextChapterScreenVisible: nextChapterScreenVisible.current,
+          })};
 
 
                 var initialReaderConfig = ${JSON.stringify({
-                  readerSettings,
-                  chapterGeneralSettings,
-                  novel,
-                  chapter,
-                  nextChapter,
-                  prevChapter,
-                  batteryLevel,
-                  autoSaveInterval: 2222,
-                  DEBUG: __DEV__,
-                  strings: {
-                    finished: `${getString(
-                      'readerScreen.finished',
-                    )}: ${chapter.name.trim()}`,
-                    nextChapter: getString('readerScreen.nextChapter', {
-                      name: nextChapter?.name,
-                    }),
-                    noNextChapter: getString('readerScreen.noNextChapter'),
-                  },
-                })}
+            readerSettings,
+            chapterGeneralSettings,
+            novel,
+            chapter,
+            nextChapter,
+            prevChapter,
+            batteryLevel,
+            autoSaveInterval: 2222,
+            DEBUG: __DEV__,
+            strings: {
+              finished: `${getString(
+                'readerScreen.finished',
+              )}: ${chapter.name.trim()}`,
+              nextChapter: getString('readerScreen.nextChapter', {
+                name: nextChapter?.name,
+              }),
+              noNextChapter: getString('readerScreen.noNextChapter'),
+            },
+          })}
               </script>
               <script src="${assetsUriPrefix}/js/polyfill-onscrollend.js"></script>
               <script src="${assetsUriPrefix}/js/icons.js"></script>

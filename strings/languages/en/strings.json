@@ -221,6 +221,7 @@
     "sort": "Sort",
     "submit": "Submit",
     "loading": "Loading ...",
+    "unlimited": "Unlimited",
     "warning": "Warning"
   },
   "webview": {
@@ -448,6 +449,7 @@
     "bottomSheet": {
       "allowTextSelection": "Text selection",
       "autoscroll": "Auto-scroll",
+      "autoReadLimit": "Auto-read limit",
       "bionicReading": "Bionic reading",
       "tapToScroll": "Tap to scroll",
       "color": "Color",

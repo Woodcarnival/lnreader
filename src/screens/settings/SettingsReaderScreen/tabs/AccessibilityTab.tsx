@@ -160,6 +160,29 @@ const AccessibilityTab: React.FC = () => {
                   }
                 />
               </View>
+              <View style={styles.sliderSection}>
+                <Text style={[styles.sliderLabel, { color: theme.onSurface }]}>
+                  {getString('readerScreen.bottomSheet.autoReadLimit')}:{' '}
+                  {tts?.autoReadCount === 0
+                    ? getString('common.unlimited')
+                    : tts?.autoReadCount}
+                </Text>
+                <Slider
+                  style={styles.slider}
+                  value={tts?.autoReadCount || 0}
+                  minimumValue={0}
+                  maximumValue={50}
+                  step={1}
+                  minimumTrackTintColor={theme.primary}
+                  maximumTrackTintColor={theme.surfaceVariant}
+                  thumbTintColor={theme.primary}
+                  onSlidingComplete={value =>
+                    setChapterReaderSettings({
+                      tts: { ...tts, autoReadCount: value },
+                    })
+                  }
+                />
+              </View>
               <View style={styles.resetButtonContainer}>
                 <Button
                   title={getString('common.reset')}
@@ -167,8 +190,9 @@ const AccessibilityTab: React.FC = () => {
                   onPress={() => {
                     setChapterReaderSettings({
                       tts: {
-                        pitch: 1,
                         rate: 1,
+                        pitch: 1,
+                        autoReadCount: 0,
                         voice: { name: 'System', language: 'System' } as Voice,
                       },
                     });
